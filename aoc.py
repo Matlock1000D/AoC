@@ -7,34 +7,42 @@ class Active_Instruction:
             self.age = 0
 
 class Cpu:
+
+    X = 0
+
     def __init__(self, instructions=None) -> None:
         self.X = 1
         self.cycle = 1
         self.instructions = instructions
+        self.signal_sum = 0
         
     @classmethod
-    def addreg(cls, V):
-        cls.X += V
-
+    def addreg(cls, self, V):
+        self.X += V
+    
+    def check_signal(self):
+        return self.X * self.cycle
+    
     def run(self, program, reset_cycles=True):
         active_instruction = None
+        if reset_cycles:
+            self.cycle = 1
         while True:
-            if reset_cycles:
-                self.cycle = 1     
+            if self.cycle in [20,60,100,140,180,220]:
+                self.signal_sum += self.check_signal()
             if active_instruction == None:
                 try:
                     programline = program.pop(0)
                 except:
                     #ohjelma loppu
-                    return 1
+                    return self.signal_sum
                 active_instruction = Active_Instruction(self.instructions[programline[0]])
+            active_instruction.age += 1 #Oletetaan, ettei käsky voi kestää nollaa sykliä
             if active_instruction.age >= active_instruction.instruction.duration:
                 if active_instruction.instruction.action is not None:
-                    active_instruction.instruction.action(int(programline[1]))  #Ei kovin yleisessä muodossa tämä
+                    active_instruction.instruction.action(self, int(programline[1]))  #Ei kovin yleisessä muodossa tämä
                 active_instruction = None
-            else:
-                active_instruction.age += 1
-                self.cycle += 1
+            self.cycle += 1
 
 class Instruction:
     def __init__(self, name, duration, action) -> None:
@@ -60,7 +68,7 @@ def main(argv):
     instructions = init_instructions()
     program = get_program(argv[1])
     cpu = Cpu(instructions)
-    cpu.run(program)
+    print(cpu.run(program))
     
 
 if __name__ == "__main__":
