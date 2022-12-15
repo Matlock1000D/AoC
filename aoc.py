@@ -9,12 +9,16 @@ class Active_Instruction:
 class Cpu:
 
     X = 0
+    XPIXEL = 40
 
     def __init__(self, instructions=None) -> None:
         self.X = 1
         self.cycle = 1
         self.instructions = instructions
         self.signal_sum = 0
+        self.get_signal = False
+        self.draw_image = False
+        self.image = ''
         
     @classmethod
     def addreg(cls, self, V):
@@ -22,21 +26,37 @@ class Cpu:
     
     def check_signal(self):
         return self.X * self.cycle
+
+    def draw_pixel(self):
+        if abs(self.X - (self.cycle-1)%self.XPIXEL) <= 1:
+            addchar = '#'
+        else:  
+            addchar = '.'
+        self.image += addchar
+        if (self.cycle)%self.XPIXEL == 0:
+            self.image += '\n'
     
     def run(self, program, reset_cycles=True):
         active_instruction = None
         if reset_cycles:
             self.cycle = 1
         while True:
-            if self.cycle in [20,60,100,140,180,220]:
+            if self.get_signal and self.cycle in [20,60,100,140,180,220]:
                 self.signal_sum += self.check_signal()
             if active_instruction == None:
                 try:
                     programline = program.pop(0)
                 except:
                     #ohjelma loppu
-                    return self.signal_sum
+                    if self.get_signal:
+                        return self.signal_sum
+                    elif self.draw_image:
+                        return self.image
+                    else:
+                        return -1
                 active_instruction = Active_Instruction(self.instructions[programline[0]])
+            if self.draw_image:
+                self.draw_pixel()
             active_instruction.age += 1 #Oletetaan, ettei käsky voi kestää nollaa sykliä
             if active_instruction.age >= active_instruction.instruction.duration:
                 if active_instruction.instruction.action is not None:
@@ -65,11 +85,16 @@ def get_program(file):
     return inst_list
 
 def main(argv):
-    instructions = init_instructions()
-    program = get_program(argv[1])
-    cpu = Cpu(instructions)
-    print(cpu.run(program))
+    #aoc.py päivä osa tiedosto
+    if argv[1] == '10':
+        instructions = init_instructions()
+        program = get_program(argv[3])
+        cpu = Cpu(instructions)
+        if argv[2] == '1':
+            cpu.get_signal = True
+        elif argv[2] == '2':
+            cpu.draw_image = True
+        print(cpu.run(program))
     
-
 if __name__ == "__main__":
     main(sys.argv)
