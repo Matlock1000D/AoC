@@ -84,20 +84,21 @@ def get_program(file):
             inst_list.append(row)
     return inst_list
 
-def max_calories(file):
+def calories(file):
     calories = [0]
     with open(file, 'r') as f:
         for line in f:
             if line == '\n': calories.append(0)
             else: calories[-1] += int(line)
     #voi tulla ylimääräinen 0-rivi, mutta se ei voi olla suurin
-    return max(calories)
+    return calories
 
 
 def main(argv):
     #aoc.py päivä osa tiedosto
     if argv[1] == '1':
-        print(max_calories(argv[3]))
+        if argv[2] == '1': print(max(calories(argv[3])))
+        if argv[2] == '2': print(sum(sorted(calories(argv[3]), reverse=True)[:3]))
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
