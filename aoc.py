@@ -93,12 +93,40 @@ def calories(file):
     #voi tulla ylimääräinen 0-rivi, mutta se ei voi olla suurin
     return calories
 
+class Janken:
+    def __init__(self, matchesfile):
+        self.points = 0
+        self.moves = []
+        with open(matchesfile, 'r') as f:
+            reader = csv.reader(f, delimiter=" ")
+            for row in reader:
+                self.moves.append(row)
+
+    def get_selectionpoints(self, move: str) -> int:
+        if move in ['X','Y','Z']:
+            return (ord(move)-87)
+
+    def get_resultpoints(self, match: list[str]) -> int:
+        if match[0] not in ['A','B','C'] or match[1] not in ['X','Y','Z']: raise ValueError('Kielletty käsi')
+        return(((ord(match[1])-ord(match[0])-1)%3)*3) 
+        
+
+    def get_points(self):
+        points = 0
+        for match in self.moves:    #match[0] = vastustajan liike, match[1] oma
+            points += self.get_selectionpoints(match[1]) + self.get_resultpoints(match)
+        return points
+
 
 def main(argv):
     #aoc.py päivä osa tiedosto
     if argv[1] == '1':
         if argv[2] == '1': print(max(calories(argv[3])))
         if argv[2] == '2': print(sum(sorted(calories(argv[3]), reverse=True)[:3]))
+    if argv[1] == '2':
+        if argv[2] == '1': 
+            janken = Janken(argv[3])
+            print(janken.get_points())
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
