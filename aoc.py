@@ -146,20 +146,24 @@ def priorities(file, spec):
                 prio_sum += get_prio(mistake)
         return prio_sum
 
-def check_overlap(line:str) -> bool:
+def check_overlap(line:str, spec:str) -> bool:
     assignments = line.split(',')
     limits = []
     for assignment in assignments:
         limits.append(assignment.split('-'))
-    if int(limits[0][0]) <= int(limits[1][0]) and int(limits[0][1]) >= int(limits[1][1]): return True
-    if int(limits[0][0]) >= int(limits[1][0]) and int(limits[0][1]) <= int(limits[1][1]): return True
-    return False
+    if spec == '2':
+        if int(limits[0][1]) < int(limits[1][0]) or int(limits[0][0]) > int(limits[1][1]): return False
+        else: return True
+    else:
+        if int(limits[0][0]) <= int(limits[1][0]) and int(limits[0][1]) >= int(limits[1][1]): return True
+        if int(limits[0][0]) >= int(limits[1][0]) and int(limits[0][1]) <= int(limits[1][1]): return True
+        return False
 
 def overlaps_count(file, spec):
     overlaps = 0
     with open(file, 'r') as f:
         for line in f:
-            if check_overlap(line.strip()): overlaps += 1
+            if check_overlap(line.strip(),spec): overlaps += 1
     return overlaps
 
 def main(argv):
