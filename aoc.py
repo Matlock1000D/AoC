@@ -122,17 +122,29 @@ class Janken:
             points += self.get_selectionpoints(match) + self.get_resultpoints(match)
         return points
 
-def priorities(file):
+def get_prio(mistake):
+    x = ord(mistake.swapcase())-64
+    if mistake.isupper(): x -= 6
+    return x
+
+def priorities(file, spec):
     prio_sum = 0
-    with open(file, 'r') as f:
-        for line in f:
-            splitpoint = int((len(line.strip()))/2)
-            comp1 = line[:splitpoint]
-            comp2 = line[splitpoint:]
-            mistake = set(comp1).intersection(set(comp2)).pop()
-            prio_sum += ord(mistake.swapcase())-64
-            if mistake.isupper(): prio_sum -= 6
-    return prio_sum
+    if spec == '2':
+        with open(file, 'r') as f:
+            i = iter(f)
+            for a,b,c in zip(i,i,i):
+                badge = set(a.strip()).intersection(set(b.strip())).intersection(set(c.strip())).pop()
+                prio_sum += get_prio(badge)
+        return prio_sum
+    else:
+        with open(file, 'r') as f:
+            for line in f:
+                splitpoint = int((len(line.strip()))/2)
+                comp1 = line[:splitpoint]
+                comp2 = line[splitpoint:]
+                mistake = set(comp1).intersection(set(comp2)).pop()
+                prio_sum += get_prio(mistake)
+        return prio_sum
 
 def main(argv):
     #aoc.py päivä osa tiedosto
@@ -145,7 +157,7 @@ def main(argv):
         else: janken = Janken(argv[3],'result')
         print(janken.get_points())
     if argv[1] == '3':
-        print(priorities(argv[3]))
+        print(priorities(argv[3],argv[2]))
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
