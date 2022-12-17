@@ -166,6 +166,28 @@ def overlaps_count(file, spec):
             if check_overlap(line.strip(),spec): overlaps += 1
     return overlaps
 
+
+def crane(initfile, spec):
+    with open(initfile, 'r') as f:
+        for i, line in enumerate(f):
+            if len(line) < 2: continue
+            if i == 0:
+                stacks = int(len(line)/4)
+                stack_dict = {}
+                for x in range(stacks):
+                    stack_dict[x]  = []
+            if line[1].isupper() or line[1] == ' ':   #tunnistaa laatikkorivit
+                for i in range(stacks):
+                    box = line[1 + i*4]
+                    if box.isalpha(): stack_dict[i].insert(0, box)
+            if line[0] == 'm':
+                moves = line.split(' ')
+                for i in range(int(moves[1])):
+                    stack_dict[int(moves[5])-1].append(stack_dict[int(moves[3])-1].pop())
+    tops = []
+    for i in range(stacks): tops.append(stack_dict[i].pop())
+    return ''.join(tops)
+
 def main(argv):
     #aoc.py päivä osa tiedosto
     if argv[1] == '1':
@@ -180,6 +202,8 @@ def main(argv):
         print(priorities(argv[3],argv[2]))
     if argv[1] == '4':
         print(overlaps_count(argv[3],argv[2]))
+    if argv[1] == '5':
+        print(crane(argv[3],argv[2]))
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
