@@ -181,9 +181,16 @@ def crane(initfile, spec):
                     box = line[1 + i*4]
                     if box.isalpha(): stack_dict[i].insert(0, box)
             if line[0] == 'm':
-                moves = line.split(' ')
-                for i in range(int(moves[1])):
-                    stack_dict[int(moves[5])-1].append(stack_dict[int(moves[3])-1].pop())
+                moves = line.strip().split(' ')
+                if spec == '2':
+                    lifted_crates = []
+                    for i in range(int(moves[1])):
+                        lifted_crates.append(stack_dict[int(moves[3])-1].pop())
+                    lifted_crates.reverse()
+                    stack_dict[int(moves[5])-1] += lifted_crates
+                else:
+                    for i in range(int(moves[1])):
+                        stack_dict[int(moves[5])-1].append(stack_dict[int(moves[3])-1].pop())
     tops = []
     for i in range(stacks): tops.append(stack_dict[i].pop())
     return ''.join(tops)
