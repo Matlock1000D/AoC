@@ -196,10 +196,12 @@ def crane(initfile, spec):
     return ''.join(tops)
 
 def get_signal(file, spec):
+    if spec == '1': a = 4
+    else: a = 14
     with open(file, 'r') as f:
         signal = f.read()
-    for i in range(4,len(signal)):
-        if len(set(signal[i-4:i])) == 4: 
+    for i in range(a,len(signal)):
+        if len(set(signal[i-a:i])) == a: 
             return i
     return -1
 
