@@ -1,5 +1,6 @@
 import sys
 import csv
+from day7 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -223,6 +224,14 @@ def main(argv):
         print(crane(argv[3],argv[2]))
     if argv[1] == '6':
         print(get_signal(argv[3],argv[2]))
+    if argv[1] == '7':
+        dos = Dos()
+        dos.read_batch(argv[3])
+        sizes = dos.get_all_size()
+        savable = 0
+        for dir in sizes:
+            if sizes[dir] <= 100000: savable += sizes[dir]
+        print(savable)
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
