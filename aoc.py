@@ -195,6 +195,14 @@ def crane(initfile, spec):
     for i in range(stacks): tops.append(stack_dict[i].pop())
     return ''.join(tops)
 
+def get_signal(file, spec):
+    with open(file, 'r') as f:
+        signal = f.read()
+    for i in range(4,len(signal)):
+        if len(set(signal[i-4:i])) == 4: 
+            return i
+    return -1
+
 def main(argv):
     #aoc.py päivä osa tiedosto
     if argv[1] == '1':
@@ -211,6 +219,8 @@ def main(argv):
         print(overlaps_count(argv[3],argv[2]))
     if argv[1] == '5':
         print(crane(argv[3],argv[2]))
+    if argv[1] == '6':
+        print(get_signal(argv[3],argv[2]))
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
