@@ -2,6 +2,7 @@ import sys
 import csv
 from day7 import *
 from day8 import *
+from day9 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -243,6 +244,8 @@ def main(argv):
             print(goodsizes[0])
     if argv[1] == '8':
         print(get_visibility(argv[3],argv[2]))
+    if argv[1] == '9':
+        print(follow_rope(argv[3],argv[2]))
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
