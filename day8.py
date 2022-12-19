@@ -1,5 +1,27 @@
 import numpy as np
 
+def check_scenic_score(tree, it_trees, np_trees):
+    index = it_trees.multi_index
+    score = 1
+    for dir in [-1, 1]:
+        checkin = index[0]+dir
+        trees = 0
+        while checkin >= 0 and checkin < np_trees.shape[0]:
+            trees += 1
+            if np_trees[checkin, index[1]] >= tree: 
+                break
+            checkin += dir
+        score *= trees
+        checkin = index[1]+dir
+        trees = 0
+        while checkin >= 0 and checkin < np_trees.shape[1]:
+            trees += 1
+            if np_trees[index[0], checkin] >= tree:
+                break
+            checkin += dir
+        score *= trees
+    return score
+
 def check_visibility(tree, it_trees, np_trees):
     index = it_trees.multi_index
     for dir in [-1, 1]:
@@ -33,9 +55,16 @@ def get_visibility(file, spec):
     np_trees = np.asarray(trees, dtype=int)
     visible = 0
     it_trees = np.nditer(np_trees, flags=['multi_index'])
-    for tree in it_trees:
-        visible += check_visibility(tree, it_trees, np_trees)
-    return visible
+    if spec == '1':
+        for tree in it_trees:
+            visible += check_visibility(tree, it_trees, np_trees)
+        return visible
+    else:
+        top_score = 0
+        for tree in it_trees:
+            score = check_scenic_score(tree, it_trees, np_trees)
+            if top_score < score: top_score = score
+        return top_score
         
 
 
