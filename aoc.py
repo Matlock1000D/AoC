@@ -1,6 +1,7 @@
 import sys
 import csv
 from day7 import *
+from day8 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -228,10 +229,20 @@ def main(argv):
         dos = Dos()
         dos.read_batch(argv[3])
         sizes = dos.get_all_size()
-        savable = 0
-        for dir in sizes:
-            if sizes[dir] <= 100000: savable += sizes[dir]
-        print(savable)
+        if argv[2] == '1':
+            savable = 0
+            for dir in sizes:
+                if sizes[dir] <= 100000: savable += sizes[dir]
+            print(savable)
+        else:
+            limit = 30000000 - (70000000 - sizes['/'])
+            goodsizes = []
+            for dir in sizes:
+                if sizes[dir] >= limit: goodsizes.append(sizes[dir])
+            goodsizes.sort()
+            print(goodsizes[0])
+    if argv[1] == '8':
+        print(get_visibility(argv[3],argv[2]))
     if argv[1] == '10':
         instructions = init_instructions()
         program = get_program(argv[3])
