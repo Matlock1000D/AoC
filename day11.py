@@ -51,14 +51,22 @@ def get_monkey_business(monkeys):
     y.sort(reverse=True)
     return y[0]*y[1]
 
-def run_monkeygame(monkeys, turns):
+def run_monkeygame(monkeys, turns, relaxation):
+    #haetaan pym
+    x = set()
+    for m in monkeys:
+        x.add(monkeys[m].dividend)
+    megadiv = 1
+    for y in x: megadiv *= y
+
     for i in range(turns):
         for monkey_key in monkeys:
             while len(monkeys[monkey_key].items) > 0:
                 monkeys[monkey_key].inspections += 1
                 item = monkeys[monkey_key].items[0]
                 monkeys[monkey_key].items[0] = monkeys[monkey_key].operand(item, monkeys[monkey_key].modifier)
-                monkeys[monkey_key].items[0] = monkeys[monkey_key].items[0]//3
+                if relaxation == 1: monkeys[monkey_key].items[0] = monkeys[monkey_key].items[0]%megadiv
+                else: monkeys[monkey_key].items[0] = monkeys[monkey_key].items[0]//relaxation
                 if monkeys[monkey_key].items[0]%monkeys[monkey_key].dividend == 0:
                     monkeys[monkeys[monkey_key].target_true].items.append(monkeys[monkey_key].items.pop(0))
                 else:

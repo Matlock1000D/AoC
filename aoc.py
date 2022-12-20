@@ -258,7 +258,8 @@ def main(argv):
         print(cpu.run(program))
     if argv[1] == '11':
         monkeys = read_monkeyfile(argv[3],argv[2])
-        print(run_monkeygame(monkeys, 20))
+        if argv[2] == '1': print(run_monkeygame(monkeys, 20, 3))
+        else: print(run_monkeygame(monkeys, 10000, 1))
     
 if __name__ == "__main__":
     main(sys.argv)
