@@ -6,11 +6,12 @@ def find_maproute(file, spec):
         for y, line in enumerate(f):
             numline = []
             for x, char in enumerate(line.strip()):
-                if char == 'S':
+                if spec == '1' and char == 'S':
                     start = (x,y)
                     char = 'a'
                 if char == 'E':
-                    goal = (x,y)
+                    if spec == '1': goal = (x,y)
+                    else: start = (x,y)
                     char = 'z'
                 numline.append(ord(char))
             contours.append(numline)
@@ -31,8 +32,12 @@ def find_maproute(file, spec):
                         next_l[i] += dir
                         next_i = tuple(next_l)
                         nextheight = np_contours[next_i]
-                        if nextheight <= np_contours[current]+1 and next_i not in visited:
+                        if spec == '1' and nextheight <= np_contours[current]+1 and next_i not in visited:
                             if next_i == goal: return moves
+                            nextcurrents.append(next_i)
+                            visited.append(next_i)
+                        elif spec == '2' and nextheight >= np_contours[current]-1 and next_i not in visited:
+                            if np_contours[next_i] == ord('a'): return moves
                             nextcurrents.append(next_i)
                             visited.append(next_i)
         currents = nextcurrents.copy()
