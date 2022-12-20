@@ -4,6 +4,7 @@ from day7 import *
 from day8 import *
 from day9 import *
 from day11 import *
+from day12 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -260,6 +261,8 @@ def main(argv):
         monkeys = read_monkeyfile(argv[3],argv[2])
         if argv[2] == '1': print(run_monkeygame(monkeys, 20, 3))
         else: print(run_monkeygame(monkeys, 10000, 1))
+    if argv[1] == '12':
+        print(find_maproute(argv[3],argv[2]))
     
 if __name__ == "__main__":
     main(sys.argv)
