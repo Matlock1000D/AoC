@@ -51,7 +51,17 @@ def compare_signals(signals):
         pair += 1
         if smaller_first(i,j) == 1: corrects.append(pair)
     return sum(corrects)
-         
+
+def sort_signals(signals):
+    i = 0
+    while i < len(signals)-1:
+        if not (smaller_first(signals[i],signals[i+1])):
+            temp = signals[i]
+            signals[i], signals[i+1] = signals[i+1], signals[i]
+            if i > 0: i -= 1
+        else: i += 1
+    return((signals.index([[2]]) +1 )* (signals.index([[6]])+1))
+
 
 def read_signal(file, spec):
     with open(file, 'r') as f:
@@ -61,4 +71,11 @@ def read_signal(file, spec):
             if len(linelist) == 0 or linelist[0] == '': continue
             parse_list(linelist)
             signals.append(linelist)
-    return compare_signals(signals)
+    if spec == '1': return compare_signals(signals)
+    if spec == '2': #lisätään jakopaketit
+        dividers = ['[[2]]','[[6]]']
+        for divider in dividers:
+            dividerlist = divider.strip().split(',')
+            parse_list(dividerlist)
+            signals.append(dividerlist)
+        return sort_signals(signals)    #lajitellaan rivit
