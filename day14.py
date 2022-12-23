@@ -1,7 +1,7 @@
 import numpy as np
 from operator import itemgetter
 
-def build_cavemap(file:str):
+def build_cavemap(file:str, spec:str):
     walllines = []
     with open(file, 'r') as f:
         for line in f:
@@ -16,6 +16,7 @@ def build_cavemap(file:str):
             #Tässä kohtaa rivin seinien kulmien koordinaatit ovat (int,int)-monikkojen listana
             walllines.append(nodes)
         #Nyt kun kulmalista on valmis, tiedetään, miten suuri taulukko tarvitaan
+        #Ei riitä, jos luolalla on lattia... Kovakoodattu kakkosvaiheessa leveämmäksi
     maxes = []
     for line in walllines:
         linemaxes = []
@@ -29,7 +30,11 @@ def build_cavemap(file:str):
     real_maxes[1] = real_maxes[1]+1 #lisätään yksi tyhjä rivi alas
     ### luodaan luolastokartta ###
     for i in range(2): real_maxes[i] += 1
+    if spec == '2':
+        real_maxes[0] = 1000 
+        real_maxes[1] += 1
     cavemap = np.zeros(tuple(real_maxes), dtype=int, order='F')
+    if spec == '2': cavemap[:,real_maxes[1]-1] = 1
     for line in walllines:
         for i, node in enumerate(line):
             if i == len(line) - 1: break
@@ -62,6 +67,7 @@ def build_cavemap(file:str):
                 if dir == 100:
                     falling = False
                     cavemap[*grain] = 2
+                    if grain == [500,0]: return grains+1
                 elif cavemap[grain[0]+dir,grain[1]+1] == 0:
                     grain[0], grain[1] = grain[0]+dir, grain[1] + 1
                     break
