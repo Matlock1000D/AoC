@@ -7,6 +7,7 @@ from day11 import *
 from day12 import *
 from day13 import *
 from day14 import *
+from day15 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -269,6 +270,8 @@ def main(argv):
         print(read_signal(argv[3],argv[2]))
     if argv[1] == '14':
         print(build_cavemap(argv[3],argv[2]))
+    if argv[1] == '15':
+        print(scanners(argv[3],argv[2]))
     
 if __name__ == "__main__":
     main(sys.argv)
