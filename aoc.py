@@ -10,6 +10,7 @@ from day14 import *
 from day15 import *
 from day16 import *
 from day17 import *
+from day18 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -278,6 +279,8 @@ def main(argv):
         print(maximise_pressure(argv[3],argv[2]))
     if argv[1] == '17':
         print(tetris(argv[3],argv[2]))
+    if argv[1] == '18':
+        print(get_sides(argv[3],argv[2]))
     
 if __name__ == "__main__":
     main(sys.argv)
