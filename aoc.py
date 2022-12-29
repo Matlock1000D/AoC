@@ -12,6 +12,7 @@ from day16 import *
 from day17 import *
 from day18 import *
 from day19 import *
+from day20 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -284,6 +285,8 @@ def main(argv):
         print(get_sides(argv[3],argv[2]))
     if argv[1] == '19':
         print(do_robots(argv[3],argv[2]))
+    if argv[1] == '20':
+        print(shuffle(argv[3],argv[2]))
     
 if __name__ == "__main__":
     main(sys.argv)
