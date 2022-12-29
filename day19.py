@@ -109,10 +109,17 @@ def run_factory(robotfactory, spec='1'):
     complete = False
     while not complete:
         t = 0
+        lastchoice = t
         if autopilot:
             newrobo = autosequence.pop(0)
             robotsequence = [newrobo]
         while t < t_max:
+            #if newrobo == 'ore' and t >= t_max-robotfactory.maxprices['ore']-2:
+                #liian myöhäistä rakentaa orebottia
+            #    newrobo = 'clay'
+            #    robotsequence[-1] = 'clay'
+            #    robotfactory.lose_materials(t-lastchoice)
+            #    t = lastchoice
             if newrobo != 'geode':
                 if robotfactory.stores[newrobo] + (t_max-t)*robotfactory.robots[newrobo] >= (t_max-t)*robotfactory.maxprices[newrobo]:
                     bannedrobos.add(newrobo)
@@ -124,23 +131,26 @@ def run_factory(robotfactory, spec='1'):
                                 bannedrobos.add(robot)
                                 continue
                         newrobo = robot
+                        lastchoice = t
                         break
                     continue
-            if robotfactory.start_building(newrobo) and t<t_max-1:
-                if autopilot:
-                    if len(autosequence) > 0: newrobo = autosequence.pop(0)
-                    else: autopilot = False
-                if not autopilot:
-                    for i in range(1,5):
-                        robot = robotcodes[i]
-                        if robot in bannedrobos: continue
-                        if robot != 'geode':
-                            if robotfactory.stores[robot] + (t_max-t)*robotfactory.robots[robot] >= (t_max-t)*robotfactory.maxprices[robot]:
-                                bannedrobos.add(robot)
-                                continue
-                        newrobo = robot
-                        break
-                robotsequence.append(newrobo)
+            if t<t_max-1:
+                if robotfactory.start_building(newrobo) and t<t_max-1:
+                    if autopilot:
+                        if len(autosequence) > 0: newrobo = autosequence.pop(0)
+                        else: autopilot = False
+                    if not autopilot:
+                        for i in range(1,5):
+                            robot = robotcodes[i]
+                            if robot in bannedrobos: continue
+                            if robot != 'geode':
+                                if robotfactory.stores[robot] + (t_max-t)*robotfactory.robots[robot] >= (t_max-t)*robotfactory.maxprices[robot]:
+                                    bannedrobos.add(robot)
+                                    continue
+                            newrobo = robot
+                            lastchoice = t
+                            break
+                    robotsequence.append(newrobo)
             robotfactory.get_materials()
             robotfactory.build()
             t += 1
@@ -159,7 +169,9 @@ def run_factory(robotfactory, spec='1'):
             autopilot = True
             bannedrobos = set()
             robotfactory.reset()
-    return robotfactory.number * maxgeodes
+    print(maxgeodes)
+    if spec == '1': return robotfactory.number * maxgeodes
+    return maxgeodes
 
 def do_robots(file, spec):
     robotfactories = []
