@@ -1,4 +1,7 @@
 from itertools import combinations_with_replacement, permutations
+from math import prod
+
+#jos vieläkin on liian hidas, ruvetaan välimuistittamaan robottitehtaiden tiloja ja palataan niihin, ei simuloida alusta
 
 class Robotfactory:
     def __init__(self, number:int, blueprint:str) -> None:
@@ -58,17 +61,17 @@ def has_been_tried(x, tried):
         if same: return True
     return False
 
-def next_robotsequence(robotsequence,prices):
+def next_robotsequence(robotsequence,prices,length=24):
     robotcodes = {'ore': 1, 'clay': 2,'obsidian': 3, 'geode': 4}
     if len(robotsequence) < 1: 
         robotsequence = []
         return []
     if robotsequence[-1] < 4:
         robotsequence[-1] += 1
-        rangeous = 24-len(robotsequence)
+        rangeous = length-len(robotsequence)
         for i in range(rangeous):
             robotsequence.append(1)
-    else: robotsequence = next_robotsequence(robotsequence[:-1],prices).copy()
+    else: robotsequence = next_robotsequence(robotsequence[:-1],prices,length).copy()
     #testataan onko sekvenssi toivoton
     ishopeless = False
     hasgeode = False
@@ -78,48 +81,84 @@ def next_robotsequence(robotsequence,prices):
             hasgeode = True
         except ValueError:
             if robotsequence == []: return []
-            robotsequence = next_robotsequence(robotsequence[:-1],prices).copy()
+            robotsequence = next_robotsequence(robotsequence[:-1],prices,length).copy()
     hopelessindex = -1
     for material in prices:
         if robotsequence[:firstgeode].count(robotcodes[material]) > prices[material]:
             ishopeless = True
             index = [i for i, n in enumerate(robotsequence) if n == robotcodes[material]][prices[material]]
             if index > hopelessindex: hopelessindex = index
-    if ishopeless: robotsequence = next_robotsequence(robotsequence[:hopelessindex],prices).copy()
+    if ishopeless: robotsequence = next_robotsequence(robotsequence[:hopelessindex],prices,length).copy()
     return robotsequence
 
-
-def run_factory(robotfactory):
+def run_factory(robotfactory, spec='1'):
     robotcodes = {1: 'ore', 2: 'clay', 3: 'obsidian', 4: 'geode'}
+    reversecode = dict()
+    for i in robotcodes.values():
+        reversecode[i] = list(robotcodes.keys())[list(robotcodes.values()).index(i)]
     robots = dict()
     robots['ore'] = 1 
     t_max = 24
-    tried = []
+    if spec == '2': t_max = 32
     maxgeodes = 0
-    robotsequence = []
-    for i in range(t_max):
-        robotsequence.append(1)
-    while robotsequence != []:        
-        xit = iter(robotsequence)
-        newrobo = robotcodes[next(xit)]
-        buildorder = [newrobo]
+    newrobo = 'ore'
+    robotsequence = [newrobo]
+    autosequence = []
+    bannedrobos = set()
+    autopilot = False
+    complete = False
+    while not complete:
         t = 0
+        if autopilot:
+            newrobo = autosequence.pop(0)
+            robotsequence = [newrobo]
         while t < t_max:
+            if newrobo != 'geode':
+                if robotfactory.stores[newrobo] + (t_max-t)*robotfactory.robots[newrobo] >= (t_max-t)*robotfactory.maxprices[newrobo]:
+                    bannedrobos.add(newrobo)
+                    for i in range(1,5):
+                        robot = robotcodes[i]
+                        if robot in bannedrobos: continue
+                        if robot != 'geode':
+                            if robotfactory.stores[robot] + (t_max-t)*robotfactory.robots[robot] >= (t_max-t)*robotfactory.maxprices[robot]:
+                                bannedrobos.add(robot)
+                                continue
+                        newrobo = robot
+                        break
+                    continue
             if robotfactory.start_building(newrobo) and t<t_max-1:
-                if newrobo != 'geode':
-                    if robotfactory.stores[newrobo] + (t_max-t)*robotfactory.robots[newrobo] >= (t_max-t)*robotfactory.maxprices[newrobo]:
-                        #sub-optimaalinen robotti rakennettu, skippaa loput
-                        t = t_max-1
-                newrobo = robotcodes[next(xit)]
-                buildorder.append(newrobo)
+                if autopilot:
+                    if len(autosequence) > 0: newrobo = autosequence.pop(0)
+                    else: autopilot = False
+                if not autopilot:
+                    for i in range(1,5):
+                        robot = robotcodes[i]
+                        if robot in bannedrobos: continue
+                        if robot != 'geode':
+                            if robotfactory.stores[robot] + (t_max-t)*robotfactory.robots[robot] >= (t_max-t)*robotfactory.maxprices[robot]:
+                                bannedrobos.add(robot)
+                                continue
+                        newrobo = robot
+                        break
+                robotsequence.append(newrobo)
             robotfactory.get_materials()
             robotfactory.build()
             t += 1
         if robotfactory.stores['geode'] > maxgeodes: maxgeodes = robotfactory.stores['geode']
-        robotsequence = robotsequence[:sum(robotfactory.robots.values())]   #viimeistä robottia ei ehditty rakentaa
-        robotsequence = next_robotsequence(robotsequence,robotfactory.maxprices).copy()
-        robotfactory.reset()
-        if robotsequence == [4]: break
+        while robotsequence[-1] == 'geode':
+            lastrobo = robotsequence.pop()
+            if lastrobo != 'geode':
+                robotsequence.append(robotcodes[reversecode[lastrobo]+1])
+            if lastrobo == 'geode' and len(robotsequence) == 0:
+                complete = True
+                break
+        if not complete: 
+            robotsequence[-1] = robotcodes[reversecode[robotsequence[-1]]+1]
+            autosequence = robotsequence.copy()
+            robotsequence = []
+            autopilot = True
+            bannedrobos = set()
+            robotfactory.reset()
     return robotfactory.number * maxgeodes
 
 def do_robots(file, spec):
@@ -129,5 +168,7 @@ def do_robots(file, spec):
             if len(line) < 1: break
             items = line.strip().split(': ')
             bpnumber = int(items[0].split(' ')[-1])
+            if spec == '2' and bpnumber > 3: break
             robotfactories.append(Robotfactory(bpnumber,items[1]))
-    return sum(run_factory(robotfactory) for robotfactory in robotfactories)
+    if spec=='1': return sum(run_factory(robotfactory) for robotfactory in robotfactories)
+    else: return prod(run_factory(robotfactory, spec) for robotfactory in robotfactories)
