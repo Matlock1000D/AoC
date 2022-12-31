@@ -1,11 +1,4 @@
-#tutki päätöksentekopuuta
-#säilytä liikehistoria
-#heitä mäkeen haarat, joissa ollaan samassa pisteessä kuin joku aiempi reitti, mutta aikaa on kulunut enemmän eikä painetta ole enempää
-
-#tee venttiililuokka
-#nimi, flowrate, linkedvalves-lista
-
-#133 on liian vähän
+#listakopiot?
 
 class Pathobj:
     def __init__(self, path, pressure, t) -> None:
@@ -15,7 +8,6 @@ class Pathobj:
     
     def current(self):
         return self.path[-1]
-
 class Valve:
     def __init__(self, name:str, flowrate:int, linkedvalves:list) -> None:
         self.name = name
@@ -38,8 +30,7 @@ def find_distances(valvename, valves):  #ei kovin optimoitu tai nätti, mutta sa
         if valve.flowrate > 0: goodvalves.append(valve.name)
     distances = {}
     for valve in goodvalves:
-        dist = 0
-        current = valvename
+        dist = 1    #aloitetaan yhdestä, koska avaaminen vie yhden sekunnin
         paths = [[valvename]]
         found = False
         while found == False:
@@ -81,7 +72,7 @@ def maximise_pressure(file, spec):
     temp_maximum = 0
     timedir = 1 #1 = eteen, -1 = taakse
     dontgo = ''
-    if spec == '1':
+    if 1==2:
         while True:
             if timedir == 1:
                 current = path[-1] 
@@ -134,7 +125,6 @@ def maximise_pressure(file, spec):
                     timedir = 1
     else:
     #rakennetaan taulukko etäisyyksistä kelvollisille venttiileille
-        max_t = 26
         maxpres = 0
         goodvalves = {'AA':find_distances('AA', valves)}
         for valve in valves.values():
@@ -142,45 +132,61 @@ def maximise_pressure(file, spec):
                 goodvalves[valve.name] = find_distances(valve.name, valves)
         valves['AA'].open_valve()   #avataan, niin algoritmi ei yritä tänne
         paths = [Pathobj(['AA'],0,0)]
+        manpaths = set()
         while True:
             newpathobjs = []
             for pathobj in paths:
                 for nextvalve in goodvalves[pathobj.current()]:
-                    time_remaining = max_t - pathobj.t - 1
-                    if (not valves[nextvalve].open) and goodvalves[pathobj.current()][nextvalve] < time_remaining and nextvalve not in pathobj.path:
+                    time_remaining = max_t - pathobj.t
+                    if (not valves[nextvalve].open) and (goodvalves[pathobj.current()][nextvalve] < time_remaining):    #kuluvan ajan pitää olla pienempi kuin jäljelläoleva aika, koska ei ole järkevää kääntää venttiiliä, ellei se ehdi päästämään kaasua ainakin sekunnin ajan
                         newpath = pathobj.path.copy()
                         newpath.append(nextvalve)
-                        t = pathobj.t+goodvalves[pathobj.current()][nextvalve] + 1
+                        t = pathobj.t+goodvalves[pathobj.current()][nextvalve]
                         pressure = pathobj.pressure + (max_t-t) * valves[nextvalve].flowrate
                         newpathobjs.append(Pathobj(newpath,pressure,t))
             if len(newpathobjs) == 0: break
-            else: paths = newpathobjs.copy()
-        for pather in paths:
+            else:
+                paths = newpathobjs.copy()
+                manpaths.update(paths)
+        if spec == '1': return(max(x.pressure for x in paths))
+        goodpaths = set()
+        for pathobj in manpaths:
+            pathobj.path.sort()
+            goodpaths.add(tuple(pathobj.path))
+        goodpressures = {}
+        for x in goodpaths:
+            goodpressures[x] = max(y.pressure for y in manpaths if tuple(y.path) == x)
+        for combination in goodpressures:
             for valve in goodvalves:
                 valves[valve].close_valve()
-            for valve in pather.path:
+            for valve in combination:
                 valves[valve].open_valve()
-            elepaths = [Pathobj(['AA'],pather.pressure,0)]
+            elepaths = [Pathobj(['AA'],goodpressures[combination],0)]
             while True:
                 newpathobjs = []
                 for pathobj in elepaths:
                     for nextvalve in goodvalves[pathobj.current()]:
-                        time_remaining = max_t - pathobj.t - 1
-                        if (not valves[nextvalve].open) and goodvalves[pathobj.current()][nextvalve] < time_remaining and nextvalve not in pathobj.path:
+                        time_remaining = max_t - pathobj.t
+                        if (not valves[nextvalve].open) and (goodvalves[pathobj.current()][nextvalve] < time_remaining) and (nextvalve not in pathobj.path):
                             newpath = pathobj.path.copy()
                             newpath.append(nextvalve)
-                            t = pathobj.t+goodvalves[pathobj.current()][nextvalve] + 1
+                            t = pathobj.t+goodvalves[pathobj.current()][nextvalve]
                             pressure = pathobj.pressure + (max_t-t) * valves[nextvalve].flowrate
                             newpathobjs.append(Pathobj(newpath,pressure,t))
                 if len(newpathobjs) == 0: break #elepathsit tälle pathille
                 else: elepaths = newpathobjs.copy()
             tempmax = max(x.pressure for x in elepaths)
-            if tempmax > maxpres: maxpres = tempmax
+            if maxpres < tempmax: 
+                maxpres = tempmax
+                maxpath = (combination,elepaths)
         return maxpres
 
+#2144
 #2397
 #2409
 #2562
+#2577
+#2581
 
     """Liian hidas tämäkin
     else:
