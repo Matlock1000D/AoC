@@ -17,6 +17,7 @@ from day21 import *
 from day22 import *
 from day23 import *
 from day24 import *
+from day25 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -299,6 +300,8 @@ def main(argv):
         print(diffusion(argv[3],argv[2]))
     if argv[1] == '24':
         print(blizzards(argv[3],argv[2]))
+    if argv[1] == '25':
+        print(snafu(argv[3],argv[2]))
     
 if __name__ == "__main__":
     main(sys.argv)
