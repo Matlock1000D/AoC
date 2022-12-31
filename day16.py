@@ -1,4 +1,4 @@
-#listakopiot?
+from copy import deepcopy
 
 class Pathobj:
     def __init__(self, path, pressure, t) -> None:
@@ -61,7 +61,6 @@ def maximise_pressure(file, spec):
             linkedvalves = linelist[9:]
             for i, value in enumerate(linkedvalves): linkedvalves[i] = value[:-1] #jämämerkit pois lopusta
             valves[name] = Valve(name, flowrate, linkedvalves)
-
     if spec == '1': max_t = 30
     else: max_t = 26
     t = 0
@@ -138,7 +137,7 @@ def maximise_pressure(file, spec):
             for pathobj in paths:
                 for nextvalve in goodvalves[pathobj.current()]:
                     time_remaining = max_t - pathobj.t
-                    if (not valves[nextvalve].open) and (goodvalves[pathobj.current()][nextvalve] < time_remaining):    #kuluvan ajan pitää olla pienempi kuin jäljelläoleva aika, koska ei ole järkevää kääntää venttiiliä, ellei se ehdi päästämään kaasua ainakin sekunnin ajan
+                    if (goodvalves[pathobj.current()][nextvalve] < time_remaining) and nextvalve not in pathobj.path:    #kuluvan ajan pitää olla pienempi kuin jäljelläoleva aika, koska ei ole järkevää kääntää venttiiliä, ellei se ehdi päästämään kaasua ainakin sekunnin ajan
                         newpath = pathobj.path.copy()
                         newpath.append(nextvalve)
                         t = pathobj.t+goodvalves[pathobj.current()][nextvalve]
