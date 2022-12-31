@@ -15,6 +15,7 @@ from day19 import *
 from day20 import *
 from day21 import *
 from day22 import *
+from day23 import *
 
 class Active_Instruction:
         def __init__(self, instruction) -> None:
@@ -293,7 +294,8 @@ def main(argv):
         print(monkeycount(argv[3],argv[2]))
     if argv[1] == '22':
         print(monkeymap(argv[3],argv[2]))
+    if argv[1] == '23':
+        print(diffusion(argv[3],argv[2]))
     
 if __name__ == "__main__":
     main(sys.argv)
-    
