@@ -292,7 +292,7 @@ def main(argv):
         print(do_robots(argv[3],argv[2]))
     if argv[1] == '20':
         print(shuffle(argv[3],argv[2]))
-    if argv[1] == '21':
+    if argv[1] == '21': 
         print(monkeycount(argv[3],argv[2]))
     if argv[1] == '22':
         print(monkeymap(argv[3],argv[2]))
